@@ -9,11 +9,7 @@ import time
 import sys
 
 
-
-
-def parse_month_data(month_data):
-	
-	months = [
+months = [
 		"January",
 		"February",
 		"March",
@@ -28,6 +24,31 @@ def parse_month_data(month_data):
 		"December"
 	]
 
+# Print iterations progress
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
+
+
+def parse_month_data(month_data):
+	
 	labels = [] 
 	data = []	
 
@@ -45,7 +66,7 @@ def parse_month_data(month_data):
 
 
 def show_year_charts(year_data):
-	fig, axes = plt.subplots(1,len(year_data), figsize=(10, 5))
+	fig, axes = plt.subplots(1,len(year_data), figsize=(25, 5))
 
 	i = 0
 	for month_data in year_data:
@@ -58,23 +79,15 @@ def show_year_charts(year_data):
 		month = date[1]
 		axes[i].set_title(f"{date[1]}")
 		
-		axes[i].pie(data, shadow = True, startangle = 90, autopct='%.0f%%')
-		axes[i].legend(labels, loc = "best")
+		axes[i].pie(data, shadow = True, startangle = 90, autopct='%1.2f%%')
+		axes[i].legend(labels, loc = "upper right")
 
 		i = i + 1
 	
 	print()
 	fig.suptitle(f"Charts for the year {date[0]}")
-	plt.show()
-
-
-def show_chart(date, labels, data):
-	plt.title(f"Additions made during the peroid of year: {date[0]}, month: {date[1]}")
 	
-		
-	plt.pie(data, labels = labels, startangle = 90, autopct='%.0f%%')
-	plt.show()
-
+	plt.show(block=True)
 
 
 
@@ -86,6 +99,9 @@ def get_chart(repo):
 
 	month_data = {}
 	year_data = []
+
+	i = 0
+	l = repo.get_commits().totalCount
 	for commit in repo.get_commits():
 		
 		# Make a new month_data dictionary
@@ -101,7 +117,9 @@ def get_chart(repo):
 		# Make a new year_data list
 		if current_year != commit.commit.author.date.year:
 
+			# Display the charts
 			show_year_charts(year_data)
+			
 			# Update the year index and empty the current year_data list to prepare making a new year_data list
 			current_year = commit.commit.author.date.year
 			year_data = []
@@ -124,6 +142,12 @@ def get_chart(repo):
 			# If the authors name is already in the month_data dictionary for this month, add their additions and deletions together
 			month_data[commit.commit.author.name]["additions"] = month_data[commit.commit.author.name]["additions"] + commit.stats.additions
 			month_data[commit.commit.author.name]["deletions"] = month_data[commit.commit.author.name]["deletions"] + commit.stats.deletions
+
+		printProgressBar(i + 1, l, prefix = 'Progress:', suffix = 'Complete', length = 50)
+		i = i + 1
+		#print(i)
+
+	print(all_data)
 			
 if __name__ == "__main__":
 
