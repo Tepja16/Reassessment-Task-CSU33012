@@ -9,42 +9,63 @@ import time
 import sys
 
 
+
+
 def parse_month_data(month_data):
 	
+	months = [
+		"January",
+		"February",
+		"March",
+		"April",
+		"May",
+		"June",
+		"July",
+		"August",
+		"September",
+		"October",
+		"November",
+		"December"
+	]
+
 	labels = [] 
 	data = []	
 
 	for key, val in month_data.items():
-		#date = (val["year"], val["month"])
+
 		labels.append(key)
 		data.append(val["additions"])
 
 	date = (
 		month_data[labels[0]]["year"],
-		month_data[labels[0]]["month"]
+		months[month_data[labels[0]]["month"] - 1]
 	)
 
 	return date, labels, data
 
 
 def show_year_charts(year_data):
-	#fig, axes = plt.subplots(1,len(year_data), figsize=(5, 5))
+	fig, axes = plt.subplots(1,len(year_data), figsize=(10, 5))
 
-	#i = 0
+	i = 0
 	for month_data in year_data:
 
 		date, labels, data = parse_month_data(month_data)
 
 		print(date, labels, data)
-		#axes[i].title(f"Additions made during the peroid of year: {date[0]}, month: {date[1]}")
-		#axes[i].pie(data, labels = labels, startangle = 90, autopct='%.0f%%')
+		
+		year = date[0]
+		month = date[1]
+		axes[i].set_title(f"{date[1]}")
+		
+		axes[i].pie(data, shadow = True, startangle = 90, autopct='%.0f%%')
+		axes[i].legend(labels, loc = "best")
 
-		#i = i + 1
+		i = i + 1
 	
 	print()
-	#plt.show()
-
-
+	fig.suptitle(f"Charts for the year {date[0]}")
+	plt.show()
 
 
 def show_chart(date, labels, data):
@@ -106,7 +127,6 @@ def get_chart(repo):
 			
 if __name__ == "__main__":
 
-	# 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
 	if len(sys.argv) > 1:
 		api_token = sys.argv[1] 
 	else:
