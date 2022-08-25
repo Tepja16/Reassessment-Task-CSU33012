@@ -40,42 +40,47 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
 def parse_month_data(month_data):
 	
 	labels = [] 
-	data = []	
+	additions = []	
+	deletions = []
 
 	for key, val in month_data.items():
 
 		labels.append(key)
-		data.append(val["additions"])
+		additions.append(val["additions"])
+		deletions.append(val["deletions"])
 
 	date = (
 		month_data[labels[0]]["year"],
 		months[month_data[labels[0]]["month"] - 1]
 	)
 
-	return date, labels, data
+	return date, labels, additions, deletions
 
 def show_year_charts(year_data):
-	fig, axes = plt.subplots(1,len(year_data), figsize=(15, 5))
+	fig, axes = plt.subplots(2, len(year_data), figsize=(15, 5))
+	print (year_data)
 	
 
 	i = 0
 	for month_data in year_data:
 
-		date, labels, data = parse_month_data(month_data)
+		date, labels, additions, deletions = parse_month_data(month_data)
 
-		print(date, labels, data)
+		print(date, labels, additions, deletions)
 		
 		year = date[0]
 		month = date[1]
-		axes[i].set_title(f"{date[1]}")
+		axes[0][i].set_title(f"{date[1]}")
 		
-		axes[i].pie(data, shadow = True, startangle = 90, autopct='%1.2f%%', radius=1.45)
-		axes[i].legend(labels, loc="best")
+		axes[0][i].pie(additions, shadow=True, startangle=90, autopct='%1.2f%%', radius=1.45)
+		axes[0][i].legend(labels, loc="best")
+		axes[1][i].pie(deletions, shadow=True, startangle=90, autopct='%1.2f%%', radius=1.45)
+		axes[1][i].legend(labels, loc="best")
 
 		i = i + 1
 	
 	print()
-	fig.suptitle(f"Charts for the year {date[0]}")
+	fig.suptitle(f"Charts for the year {date[0]} organised by additions (top) and deletions (bottom)")
 	
 	plt.show()
 
@@ -93,6 +98,7 @@ def get_chart(repo):
 
 	task = None
 	for commit in repo.get_commits():
+
 		
 		# Make a new month_data dictionary
 		if current_month != commit.commit.author.date.month or (current_month == commit.commit.author.date.month and current_year != commit.commit.author.date.year):
@@ -108,16 +114,17 @@ def get_chart(repo):
 		if current_year != commit.commit.author.date.year:
 
 
+
+			show_year_charts(year_data)
 			# Without killing the previous process a the screen will be (slowly) overwhelmed by windows of pie charts
-			if task != None:
-				task.terminate()
+			#if task != None:
+			#	task.terminate()
 			
 
 			# Display the charts, this is done is a seperate process as mthe atplotlib plt function pauses execution of the program 
-			task = Process(target=show_year_charts, args=[year_data])
+			#task = Process(target=show_year_charts, args=[year_data])
 
-			task.start()
-			
+			#task.start()
 			# Update the year index and empty the current year_data list to prepare making a new year_data list
 			current_year = commit.commit.author.date.year
 			year_data = []
