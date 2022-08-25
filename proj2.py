@@ -8,6 +8,8 @@ import time
 
 import sys
 
+from multiprocessing import Process
+
 
 months = [
 		"January",
@@ -26,18 +28,6 @@ months = [
 
 # Print iterations progress
 def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
-    """
-    Call in a loop to create terminal progress bar
-    @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
-        length      - Optional  : character length of bar (Int)
-        fill        - Optional  : bar fill character (Str)
-        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
-    """
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
@@ -64,7 +54,6 @@ def parse_month_data(month_data):
 
 	return date, labels, data
 
-
 def show_year_charts(year_data):
 	fig, axes = plt.subplots(1,len(year_data), figsize=(25, 5))
 
@@ -80,16 +69,14 @@ def show_year_charts(year_data):
 		axes[i].set_title(f"{date[1]}")
 		
 		axes[i].pie(data, shadow = True, startangle = 90, autopct='%1.2f%%')
-		axes[i].legend(labels, loc = "upper right")
+		axes[i].legend(labels, loc = "best")
 
 		i = i + 1
 	
 	print()
 	fig.suptitle(f"Charts for the year {date[0]}")
 	
-	plt.show(block=True)
-
-
+	plt.show()
 
 def get_chart(repo):
 
@@ -102,6 +89,8 @@ def get_chart(repo):
 
 	i = 0
 	l = repo.get_commits().totalCount
+
+	task = None
 	for commit in repo.get_commits():
 		
 		# Make a new month_data dictionary
@@ -117,8 +106,16 @@ def get_chart(repo):
 		# Make a new year_data list
 		if current_year != commit.commit.author.date.year:
 
-			# Display the charts
-			show_year_charts(year_data)
+
+			# Without killing the previous process a the screen will be (slowly) overwhelmed by windows of pie charts
+			if task != None:
+				task.terminate()
+			
+
+			# Display the charts, this is done is a seperate process as mthe atplotlib plt function pauses execution of the program 
+			task = Process(target=show_year_charts, args=[year_data])
+
+			task.start()
 			
 			# Update the year index and empty the current year_data list to prepare making a new year_data list
 			current_year = commit.commit.author.date.year
@@ -150,7 +147,6 @@ def get_chart(repo):
 	print(all_data)
 			
 if __name__ == "__main__":
-
 	if len(sys.argv) > 1:
 		api_token = sys.argv[1] 
 	else:
