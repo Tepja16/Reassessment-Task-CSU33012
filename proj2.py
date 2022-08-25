@@ -55,7 +55,8 @@ def parse_month_data(month_data):
 	return date, labels, data
 
 def show_year_charts(year_data):
-	fig, axes = plt.subplots(1,len(year_data), figsize=(25, 5))
+	fig, axes = plt.subplots(1,len(year_data), figsize=(15, 5))
+	
 
 	i = 0
 	for month_data in year_data:
@@ -68,8 +69,8 @@ def show_year_charts(year_data):
 		month = date[1]
 		axes[i].set_title(f"{date[1]}")
 		
-		axes[i].pie(data, shadow = True, startangle = 90, autopct='%1.2f%%')
-		axes[i].legend(labels, loc = "best")
+		axes[i].pie(data, shadow = True, startangle = 90, autopct='%1.2f%%', radius=1.45)
+		axes[i].legend(labels, loc="best")
 
 		i = i + 1
 	
