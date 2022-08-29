@@ -1,11 +1,12 @@
 from github import Github
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 import time
 
 import sys
+
+from multiprocessing import Process
 
 
 months = [
@@ -33,7 +34,6 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     if iteration == total: 
         print()
 
-
 def parse_month_data(month_data):
 	
 	labels = [] 
@@ -54,17 +54,19 @@ def parse_month_data(month_data):
 	return date, labels, additions, deletions
 
 def show_year_charts(year_data):
-	fig, axes = plt.subplots(2, len(year_data), figsize=(15, 5))
-	print (year_data)
-	
+
+	fig, axes = plt.subplots(2, len(year_data), figsize=(15, 5))	
 
 	i = 0
 	for month_data in year_data:
 
 		date, labels, additions, deletions = parse_month_data(month_data)
 
-		print(date, labels, additions, deletions)
-		
+		print(date)
+		print(f"\t authors: {labels}")
+		print(f"\t additions: {additions}")
+		print(f"\t deletions: {deletions}")
+
 		year = date[0]
 		month = date[1]
 		axes[0][i].set_title(f"{date[1]}")
@@ -79,9 +81,8 @@ def show_year_charts(year_data):
 	print()
 	fig.suptitle(f"Charts for the year {date[0]} organised by additions (top) and deletions (bottom)")
 	
-	#plt.show()
-	return plt
-
+	plt.show()
+	
 def get_chart(repo):
 
 	# Set the initial year and month
@@ -97,10 +98,8 @@ def get_chart(repo):
 	task = None
 	for commit in repo.get_commits():
 
-		
 		# Make a new month_data dictionary
 		if current_month != commit.commit.author.date.month or (current_month == commit.commit.author.date.month and current_year != commit.commit.author.date.year):
-			
 			# Append the current month_data to the year data list			
 			year_data.append(month_data)
 			
@@ -111,15 +110,21 @@ def get_chart(repo):
 		# Make a new year_data list
 		if current_year != commit.commit.author.date.year:
 
-
 			# Display the pie charts
-			show_year_charts(year_data)
+			# Without killing the previous process a the screen will be (slowly) overwhelmed by windows of pie charts
+			if task != None:
+				task.terminate()
+			
+
+			# Display the charts, this is done is a seperate process as mthe atplotlib plt function pauses execution of the program 
+			task = Process(target=show_year_charts, args=[year_data])
+
+			task.start()
 
 			# Update the year index and empty the current year_data list to prepare making a new year_data list
 			current_year = commit.commit.author.date.year
 			year_data = []
 	
-
 		# Append new month commit data to the year_data list
 		if commit.commit.author.name not in month_data:
 
@@ -140,16 +145,12 @@ def get_chart(repo):
 
 		printProgressBar(i + 1, l, prefix = 'Progress:', suffix = 'Complete', length = 50)
 		i = i + 1
-		#print(i)
-
-	print(all_data)
-			
+		
 if __name__ == "__main__":
 	if len(sys.argv) > 1:
 		api_token = sys.argv[1] 
 	else:
 		api_token = ""
-
 
 	g = Github(api_token)
 
@@ -157,5 +158,3 @@ if __name__ == "__main__":
 	repo = user.get_repo("d3") 
 
 	get_chart(repo)
-	
-
