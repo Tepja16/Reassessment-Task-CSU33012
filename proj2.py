@@ -8,8 +8,6 @@ import time
 
 import sys
 
-from multiprocessing import Process
-
 
 months = [
 		"January",
@@ -82,7 +80,8 @@ def show_year_charts(year_data):
 	print()
 	fig.suptitle(f"Charts for the year {date[0]} organised by additions (top) and deletions (bottom)")
 	
-	plt.show()
+	#plt.show()
+	return plt
 
 def get_chart(repo):
 
@@ -114,17 +113,9 @@ def get_chart(repo):
 		if current_year != commit.commit.author.date.year:
 
 
-
+			# Display the pie charts
 			show_year_charts(year_data)
-			# Without killing the previous process a the screen will be (slowly) overwhelmed by windows of pie charts
-			#if task != None:
-			#	task.terminate()
-			
 
-			# Display the charts, this is done is a seperate process as mthe atplotlib plt function pauses execution of the program 
-			#task = Process(target=show_year_charts, args=[year_data])
-
-			#task.start()
 			# Update the year index and empty the current year_data list to prepare making a new year_data list
 			current_year = commit.commit.author.date.year
 			year_data = []
