@@ -15,6 +15,8 @@ When the final_project.py python script is ran in the same directory as the comm
 
 IMPORTANT NOTES:
 
+When running final_project.py there are two deletions charts that wont show in year 2015, this is because only one person commited those months and the commited no deletions, so I just passed them in the function as I could figure out how to NOT draw them.
+
 proj2.py attempt to generate the yearly windows for the pie charts in an online fashion. Due to some rare time ordering anomalies occuring in 2016 onwards the program breaks around the 2016 - 2015 interval.
 
 Due to the above error I decided to rewrite the the program. The final program consists of two programs: make_csv.py and final_project.py. The make_csv.py will (when given a Github API key) attept to download the commit data into a csv file. The csv file is needed by the final_project.py which processed and displays the windows. 
