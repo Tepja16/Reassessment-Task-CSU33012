@@ -48,25 +48,6 @@ def preprocess_csv():
 
 	return processed_data
 
-def parse_month_data(month_data):
-	
-	labels = [] 
-	additions = []	
-	deletions = []
-
-	for key, val in month_data.items():
-
-		labels.append(key)
-		additions.append(val["additions"])
-		deletions.append(val["deletions"])
-
-	date = (
-		month_data[labels[0]]["year"],
-		months[month_data[labels[0]]["month"] - 1]
-	)
-
-	return date, labels, additions, deletions
-
 def show_year_charts(year, year_data):
 
 	fig, axes = plt.subplots(2, len(year_data), figsize=(15, 5))	
