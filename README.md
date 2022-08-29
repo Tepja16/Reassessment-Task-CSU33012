@@ -5,7 +5,7 @@ This is the Reassessment Task for CSU33012.
 This project is written in python using the pyGithub wrapper for the Github API. The project also uses the matplotlib library to generate the pie charts.
 There are also some more libraries that your system probably has installed by default such as csv, sys, time, multiprocessing.
 
-When the program is run a window for each year is generated containing the pie charts for each month of commits on the repository. These windows automatically close after a short interval and display the next yearly data. If you want to slow down the closing of the windows just edit the time.sleep() functions parameter on line 153 of final_project.py (Or you could easily rip out the threading statements and replace them with a simple call to the show_year_charts(current_year, processed_year_data) function.)
+When the program is run a window for each year is generated containing the pie charts for each month of commits (additions and deletions) on the repository. These windows automatically close after a short interval and display the next yearly data. If you want to slow down the closing of the windows just edit the time.sleep() functions parameter on line 153 of final_project.py (Or you could easily rip out the threading statements and replace them with a simple call to the show_year_charts(current_year, processed_year_data) function.)
 
 IMPORTANT NOTES:
 
