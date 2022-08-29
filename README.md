@@ -11,7 +11,7 @@ DETAILS:
 When the final_project.py python script is ran in the same directory as the commit_data.csv the program will 
   1.) (processes_csv) Open the csv file and transform it into a list of dictionaries whos keys are year, month, author, additions, deletions. 
   2.) (process_data) run through a loop where the monthly data is gathered into a list . Once a years worth of data has been processed the year_data is sent to the process_year_data function to transform it into a dictionary whos keys are the months and whos values are also dictionaries whos keys are authors and who's entries are the additions and deletions. Additions and deletions are add togather under the authors key and finally 
-  3.) The processed_yearly data is sent to the show_year_charts function which displays the window containing the >= 12 pie charts for the years (additions on top, deletions on the bottom). 
+  3.) The processed_yearly data is sent to the show_year_charts function which displays the window containing the <= 12 pie charts for the years (additions on top, deletions on the bottom). 
 
 IMPORTANT NOTES:
 
