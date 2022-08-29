@@ -1,8 +1,6 @@
-import csv 
-import sys
-import time
+#!/usr/bin/env python
 
-from github import Github
+import time
 
 import matplotlib.pyplot as plt
 
@@ -23,46 +21,12 @@ months = [
 		"December"
 	]
 
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
-    # Print New Line on Complete
-    if iteration == total: 
-        print()
-
-def make_csv(repo):
-
-	year_csv = open('commit_data.csv', 'w')
-
-	writer = csv.writer(year_csv)
-
-	header = ['year', 'month', 'author', 'additions', 'deletions']
-	writer.writerow(header)
-
-	i = 0
-	l = repo.get_commits().totalCount
-	for commit in repo.get_commits():
-
-		data = [
-			commit.commit.author.date.year,
-			commit.commit.author.date.month,
-			commit.commit.author.name,
-			commit.stats.additions,
-			commit.stats.deletions
-			]
-
-		writer.writerow(data)
-
-		printProgressBar(i + 1, l, prefix = 'Progress:', suffix = 'Complete', length = 50)
-		i = i + 1
-
-	year_csv.close()
-
 def preprocess_csv():
 
-	data = open('commit_data.csv')
+	try:
+		data = open('commit_data.csv')
+	except:
+		print("ERROR: CSV file not found")
 
 	list_data = []
 	for commit in data:
@@ -103,33 +67,41 @@ def parse_month_data(month_data):
 
 	return date, labels, additions, deletions
 
-def show_year_charts(year_data):
+def show_year_charts(year, year_data):
 
 	fig, axes = plt.subplots(2, len(year_data), figsize=(15, 5))	
 
 	i = 0
-	for month_data in year_data:
+	for month, data in year_data.items():
 
-		date, labels, additions, deletions = parse_month_data(month_data)
-
-		print(date)
+		date = months[month-1]
+		labels = list(data.keys())
+		additions = [commit_data["additions"] for author, commit_data in data.items()]
+		deletions = [commit_data["deletions"] for author, commit_data in data.items()]
+			
+		print(year, date)
 		print(f"\t authors: {labels}")
 		print(f"\t additions: {additions}")
 		print(f"\t deletions: {deletions}")
 
-		year = date[0]
-		month = date[1]
-		axes[0][i].set_title(f"{date[1]}")
+		axes[0][i].set_title(f"{date}")
 		
-		axes[0][i].pie(additions, shadow=True, startangle=90, autopct='%1.2f%%', radius=1.45)
-		axes[0][i].legend(labels, loc="best")
-		axes[1][i].pie(deletions, shadow=True, startangle=90, autopct='%1.2f%%', radius=1.45)
-		axes[1][i].legend(labels, loc="best")
+		if len(additions) == 1 and additions[0] == 0:
+			pass
+		else:
+			axes[0][i].pie(additions, shadow=True, startangle=90, autopct='%1.2f%%', radius=1.45)
+			axes[0][i].legend(labels, loc="best")
+		
+		if len(deletions) == 1 and deletions[0] == 0:
+			pass
+		else:
+			axes[1][i].pie(deletions, shadow=True, startangle=90, autopct='%1.2f%%', radius=1.45)
+			axes[1][i].legend(labels, loc="best")
 
 		i = i + 1
-	
 	print()
-	fig.suptitle(f"Charts for the year {date[0]} organised by additions (top) and deletions (bottom)")
+
+	fig.suptitle(f"Charts for the year {year} organised by additions (top) and deletions (bottom)")
 	
 	plt.show()
 
@@ -163,49 +135,32 @@ def process_year_data(year_data):
 					}
 				})
 
-
 	return processed_year_data
 
 def process_data(data):
 	
 	current_year = int(data[0]["year"])
-	
+
 	year_data = []
+
+	task = None
 	for commit in data:
-		if commit["year"] < current_year:
-			
+		if commit["year"] != current_year or commit == data[len(data)-1]:
+	
 			processed_year_data = process_year_data(year_data)
-
-			#print(processed_year_data )
 			
-			print(commit["year"])
-			for key, val in processed_year_data.items():
-				print(months[key-1], val)
+			if task != None:
+				time.sleep(5)
+				task.terminate()
 
-			print()
-			time.sleep(2)
-
+			task = Process(target=show_year_charts, args=[current_year, processed_year_data])
+			task.start()
+			
 			year_data = []
 			current_year = commit["year"]
 		else:
 			year_data.append(commit)
-
-
 		
 if __name__ == "__main__":
-	if len(sys.argv) > 1:
-		api_token = sys.argv[1] 
-	else:
-		api_token = ""
-
-	g = Github(api_token)
-
-	user = g.get_user("d3")
-	repo = user.get_repo("d3") 
-
-	#make_csv(repo)
-
 	data = preprocess_csv()
-
 	process_data(data)
-
