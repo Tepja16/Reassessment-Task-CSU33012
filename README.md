@@ -7,6 +7,12 @@ There are also some more libraries that your system probably has installed by de
 
 When the program is run a window for each year is generated containing the pie charts for each month of commits (additions and deletions) on the repository. These windows automatically close after a short interval and display the next yearly data. If you want to slow down the closing of the windows just edit the time.sleep() functions parameter on line 153 of final_project.py (Or you could easily rip out the threading statements and replace them with a simple call to the show_year_charts(current_year, processed_year_data) function.)
 
+DETAILS:
+When the final_project.py python script is ran in the same directory as the commit_data.csv the program will 
+  1.) (processes_csv) Open the csv file and transform it into a list of dictionaries whos keys are year, month, author, additions, deletions. 
+  2.) (process_data) run through a loop where the monthly data is gathered into a list . Once a years worth of data has been processed the year_data is sent to the process_year_data function to transform it into a dictionary whos keys are the months and whos values are also dictionaries whos keys are authors and who's entries are the additions and deletions. Additions and deletions are add togather under the authors key and finally 
+  3.) The processed_yearly data is sent to the show_year_charts function which displays the window containing the >= 12 pie charts for the years (additions on top, deletions on the bottom). 
+
 IMPORTANT NOTES:
 
 proj2.py attempt to generate the yearly windows for the pie charts in an online fashion. Due to some rare time ordering anomalies occuring in 2016 onwards the program breaks around the 2016 - 2015 interval.
